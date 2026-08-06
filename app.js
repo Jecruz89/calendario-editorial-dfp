@@ -1,3 +1,17 @@
+// ---------- CONFIGURACIÓN DE FIREBASE ----------
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDldirsikPbqjoCHzHtMt943iYIc03Fhws",
+  authDomain: "calendario-editorial-dfp.firebaseapp.com",
+  projectId: "calendario-editorial-dfp",
+  storageBucket: "calendario-editorial-dfp.firebasestorage.app",
+  messagingSenderId: "278365011036",
+  appId: "1:278365011036:web:6c4fd92abdce7e9fb5fa99"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 //Esperamos que todo el HTML esté cargado antes de ejecutar el script
 document.addEventListener('DOMContentLoaded',() => {
 
@@ -33,14 +47,22 @@ document.addEventListener('DOMContentLoaded',() => {
 
     const form = document.getElementById('registro-form');
 
-        function obtenerRegistros() {
-            const datos = localStorage.getItem('registros');
-            return datos ? JSON.parse(datos) : [];
-        }
+    let registrosCache = []; // aquí Firestore mantiene la copia más reciente de los datos
 
-        function guardarRegistros(registros) {
-            localStorage.setItem('registros', JSON.stringify(registros));
-        }
+    // Nos "suscribimos" a la colección: esta función se ejecuta sola
+    // cada vez que hay un cambio en Firestore, venga de quien venga
+    db.collection('registros').onSnapshot((snapshot) => {
+        registrosCache = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        renderizarTabla();
+        actualizarDashboard();
+    });
+
+    function obtenerRegistros() {
+        return registrosCache;
+    }
 
     let idEditando = null; // null = modo agregar, número = modo editar
 
@@ -155,19 +177,21 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
 
 tablaBody.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-eliminar')) {
-        const idAEliminar = Number(e.target.dataset.id);
-        let registros = obtenerRegistros();
-        registros = registros.filter(r => r.id !== idAEliminar);
-        guardarRegistros(registros);
-        renderizarTabla();
-        actualizarDashboard();
-        mostrarToast('Registro eliminado', 'error');
-}
+            const idAEliminar = e.target.dataset.id; // ya no usamos Number(), el id de Firestore es texto
+            db.collection('registros').doc(idAEliminar).delete()
+                .then(() => {
+                    mostrarToast('Registro eliminado', 'error');
+                })
+                .catch((error) => {
+                    mostrarToast('Error al eliminar', 'error');
+                    console.error(error);
+                });
+        }
 
 if (e.target.classList.contains('btn-editar')) {
-    const idAEditar = Number(e.target.dataset.id);
-    const registros = obtenerRegistros();
-    const registro = registros.find(r => r.id === idAEditar);
+        const idAEditar = e.target.dataset.id; // texto, no número
+        const registros = obtenerRegistros();
+        const registro = registros.find(r => r.id === idAEditar);
 
     // Llenamos el formulario con los datos del registro a editar
     document.getElementById('mes').value = registro.mes;
@@ -254,9 +278,8 @@ if (e.target.classList.contains('btn-editar')) {
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     const datosFormulario = {
-        id: Date.now(),
         mes: document.getElementById('mes').value,
         semana: document.getElementById('semana').value,
         categoria: document.getElementById('categoria').value,
@@ -268,32 +291,33 @@ form.addEventListener('submit', (e) => {
         notas: document.getElementById('notas').value
     };
 
-    let registros = obtenerRegistros();
-
     if (idEditando === null) {
-        // Modo agregar: se crea un nuevo registro con ID único
-        datosFormulario.id = Date.now();
-        registros.push(datosFormulario);
-        mostrarToast('Registro agregado exitosamente');
+        // Modo agregar: Firestore genera el id solo
+        db.collection('registros').add(datosFormulario)
+            .then(() => {
+                mostrarToast('Registro agregado exitosamente');
+            })
+            .catch((error) => {
+                mostrarToast('Error al agregar', 'error');
+                console.error(error);
+            });
     } else {
-        // Modo editar: Busca y actualiza el registro existente
-        const index = registros.findIndex(r => r.id === idEditando);
-        datosFormulario.id = idEditando; // Mantener el mismo ID
-        registros[index] = datosFormulario;
-        mostrarToast('Registro actualizado exitosamente');
+        // Modo editar: actualizamos el documento existente por su id
+        db.collection('registros').doc(idEditando).update(datosFormulario)
+            .then(() => {
+                mostrarToast('Registro actualizado exitosamente');
+            })
+            .catch((error) => {
+                mostrarToast('Error al actualizar', 'error');
+                console.error(error);
+            });
     }
 
-    guardarRegistros(registros);
-    renderizarTabla();
-    actualizarDashboard();
-
     form.reset();
-    idEditando = null; // Reiniciamos el modo edición
+    idEditando = null;
     document.querySelector('.btn-primary').textContent = 'Agregar Registro';
 });
     
 
-renderizarTabla(); // Renderizamos la tabla al cargar la página
-actualizarDashboard(); // Actualizamos el dashboard al cargar la página
 
 });
