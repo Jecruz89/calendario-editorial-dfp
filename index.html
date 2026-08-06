@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Editorial DFP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <header class="app-header">
+        <h1>Calendario Editorial Dirección de Formación Portuaria</h1>
+    </header>
+
+    <!--Pestaña de Navegación-->
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="formulario">Nuevo Registro</button>
+        <button class="tab-btn" data-tab="calendario">Calendario</button>
+    </nav>
+
+    <main>
+    <!--Dashboard-->
+        <section id="dashboard" class="tab-content active">
+        <h2>Resumen de Cumplimiento</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-numero" id="kpi-total">0</span>
+                <span class="kpi-etiqueta">Piezas planificadas</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-numero" id="kpi-publicadas">0</span>
+                <span class="kpi-etiqueta">Publicadas</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-numero" id="kpi-pendientes">0</span>
+                <span class="kpi-etiqueta">Pendientes / Atrasadas</span>
+            </div>
+            <div class="kpi-card kpi-destacado">
+                <span class="kpi-numero" id="kpi-cumplimiento">0%</span>
+                <span class="kpi-etiqueta">% Cumplimiento</span>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="grafica-mensual"></canvas>
+        </div>
+
+        </section>
+
+    <!--Formulario-->
+        <section id="formulario" class="tab-content">
+            <h2>Nuevo Registro</h2>
+
+            <form id="registro-form">
+
+                <div class="form-group">
+                    <label for="mes">Mes:</label>
+                    <select id="mes" name="mes" required>
+                        <option value="">-- Selecciona el mes --</option>
+                        <option>Enero</option>
+                        <option>Febrero</option>
+                        <option>Marzo</option>
+                        <option>Abril</option>
+                        <option>Mayo</option>
+                        <option>Junio</option>
+                        <option>Julio</option>
+                        <option>Agosto</option>
+                        <option>Septiembre</option>
+                        <option>Octubre</option>
+                        <option>Noviembre</option>
+                        <option>Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="semana">Semana</label>
+                    <select id="semana" required>
+                        <option value="">-- Selecciona la semana --</option>
+                        <option>Semana 1</option>
+                        <option>Semana 2</option>
+                        <option>Semana 3</option>
+                        <option>Semana 4</option>
+                        <option>Semana 5</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria" required>
+                        <option value="">-- Selecciona la categoría --</option>
+                        <option>Institucional</option> 
+                        <option>Portuario/Operativo</option>
+                        <option>Infografía</option>
+                        <option>Comunicado</option>
+                        <option>Cursos plataforma</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="red">Plataforma</label>
+                    <select id="red" required>
+                        <option value="">-- Selecciona la plataforma --</option>
+                        <option>Redes Sociales</option>
+                        <option>Página web</option>
+                        <option>Plataforma de cursos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de pieza</label>
+                    <select id="tipo" required>
+                        <option value="">-- Selecciona --</option>
+                        <option>Post estático/Pieza gráfica</option>
+                        <option>Comunicado PDF</option>
+                        <option>Banner web</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="titulo">Título / Descripción</label>
+                    <input type="text" id="titulo" placeholder="Ej: Actualización de curso" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="autor">Autor</label>
+                    <select id="autor" required>
+                        <option value="">-- Selecciona al redactor --</option>
+                        <option>Jorge Cruz</option>
+                        <option>Julissa Samayoa</option>
+                        <option>Externo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado" required>
+                        <option value="">-- Selecciona --</option>
+                        <option>Pendiente</option>
+                        <option>En diseño</option>
+                        <option>En revisión</option>
+                        <option>Aprobado</option>
+                        <option>Publicado</option>
+                        <option>Atrasado</option>
+                        <option>Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label for="notas">Notas</label>
+                    <textarea id="notas" rows="3" placeholder="Enfoque, referencias, indicaciones..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary">Agregar Registro</button>
+
+            </form>
+        </section>
+
+    <!--Calendario-->
+        <section id="calendario" class="tab-content">
+            <h2>Piezas planificadas</h2>
+
+            <div class="filtros-bar">
+                <div class="form-group">
+                    <label for="filtro-mes">Filtrar por mes</label>
+                    <select id="filtro-mes">
+                        <option value="">Todos los meses</option>
+                        <option>Enero</option>
+                        <option>Febrero</option>
+                        <option>Marzo</option>
+                        <option>Abril</option>
+                        <option>Mayo</option>
+                        <option>Junio</option>
+                        <option>Julio</option>
+                        <option>Agosto</option>
+                        <option>Septiembre</option>
+                        <option>Octubre</option>
+                        <option>Noviembre</option>
+                        <option>Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filtro-estado">Filtrar por estado</label>
+                    <select id="filtro-estado">
+                        <option value="">Todos los estados</option>
+                        <option>Pendiente</option>
+                        <option>En diseño</option>
+                        <option>En revisión</option>
+                        <option>Aprobado</option>
+                        <option>Publicado</option>
+                        <option>Atrasado</option>
+                        <option>Cancelado</option>
+                    </select>
+                </div>
+
+                <button id="btn-limpiar-filtros" class="btn-secundario">Limpiar filtros</button>
+                <button id="btn-exportar" class="btn-secundario btn-exportar">Exportar a Excel</button>
+            </div>
+
+           <table id="tabla-registros">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Semana</th>
+                        <th>Categoría</th>
+                        <th>Plataforma</th>
+                        <th>Tipo de pieza</th>
+                        <th>Título / Descripción</th>
+                        <th>Autor</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body">
+                    <!-- Los registros se llenarán aquí mediante JavaScript -->
+                </tbody>
+
+           </table>
+        </section>
+    </main>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
